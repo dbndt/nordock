@@ -1,0 +1,185 @@
+{% extends "two_column.html" %}
+
+{% load static %}
+{% load i18n %}
+{% load inventree_extras %}
+
+
+{% block page_title %}
+{% inventree_title %} | {% trans "Company" %} - {{ company.name }}
+{% endblock %}
+
+
+{% block thumbnail %}
+{% settings_value "INVENTREE_DOWNLOAD_FROM_URL" as allow_download %}
+
+<div class='dropzone part-thumb-container' id='company-thumb'>
+    <img class="part-thumb" id='company-image'
+    {% if company.image %}
+    src="{{ company.image.url }}"
+    {% else %}
+    src="{% static 'img/blank_image.png' %}"
+    {% endif %}/>
+    <div class='btn-row part-thumb-overlay'>
+        <div class='btn-group'>
+            <button type='button' class='btn btn-default btn-glyph' title='{% trans "Upload new image" %}' id='company-image-upload'><span class='fas fa-file-upload'></span></button>
+            {% if allow_download %}
+            <button type='button' class='btn btn-default btn-glyph' title="{% trans 'Download image from URL' %}" id='company-image-url'><span class='fas fa-cloud-download-alt'></span></button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_data %}
+<h3>{% trans "Company" %}</h3>
+<hr>
+<h4>
+    {{ company.name }}
+    {% if user.is_staff and perms.company.change_company %}
+    <a  href="{% url 'admin:company_company_change' company.pk %}"><span title="{% trans 'Admin view' %}" class='fas fa-user-shield'></span></a>
+    {% endif %}
+</h4>
+<p>{{ company.description }}</p>
+<div class='btn-group action-buttons'>
+    {% if company.is_supplier and roles.purchase_order.add %}
+    <button type='button' class='btn btn-default' id='company-order-2' title='{% trans "Create Purchase Order" %}'>
+        <span class='fas fa-shopping-cart'/>
+    </button>
+    {% endif %}
+    {% if perms.company.change_company %}
+    <button type='button' class='btn btn-default' id='company-edit' title='{% trans "Edit company information" %}'>
+        <span class='fas fa-edit icon-green'/>
+    </button>
+    {% endif %}
+    {% if perms.company.delete_company %}
+    <button type='button' class='btn btn-default' id='company-delete' title='{% trans "Delete Company" %}'>
+        <span class='fas fa-trash-alt icon-red'/>
+    </button>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_details %}
+<h4>{% trans "Company Details" %}</h4>
+<table class="table">
+    <col width='25'>
+{% if company.website %}
+<tr>
+    <td><span class='fas fa-globe'></span></td>
+    <td>{% trans "Website" %}</td>
+    <td><a href="{{ company.website }}">{{ company.website }}</a>{% include "clip.html"%}</td>
+</tr>
+{% endif %}
+{% if company.address %}
+<tr>
+    <td><span class='fas fa-map-marked-alt'></span></td>
+    <td>{% trans "Address" %}</td>
+    <td>{{ company.address }}{% include "clip.html"%}</td>
+</tr>
+{% endif %}
+{% if company.phone %}
+<tr>
+    <td><span class='fas fa-phone'></span></td>
+    <td>{% trans "Phone" %}</td>
+    <td>{% include "tel.html" with tel=company.phone %}</td>
+</tr>
+{% endif %}
+{% if company.email %}
+<tr>
+    <td><span class='fas fa-at'></span></td>
+    <td>{% trans "Email" %}</td>
+    <td>{% include "mail.html" with mail=company.email %}</td>
+</tr>
+{% endif %}
+{% if company.contact %}
+<tr>
+    <td><span class='fas fa-user'></span></td>
+    <td>{% trans "Contact" %}</td>
+    <td>{{ company.contact }}{% include "clip.html"%}</td>
+</tr>
+{% endif %}
+</table>
+{% endblock %}
+
+{% block js_ready %}
+{{ block.super }}
+
+    enableNavbar({
+        label: 'company',
+        toggleId: '#company-menu-toggle'
+    });
+
+    $('#company-edit').click(function() {
+        launchModalForm(
+            "{% url 'company-edit' company.id %}",
+            {
+                reload: true
+            });
+    });
+
+    $("#company-order-2").click(function() {
+        launchModalForm("{% url 'po-create' %}",
+        {
+            data: {
+                supplier: {{ company.id }},
+            },
+            follow: true,
+        });
+    });
+
+
+    $('#company-delete').click(function() {
+        launchModalForm(
+            "{% url 'company-delete' company.id %}",
+            {
+                redirect: "{% url 'company-index' %}"
+            });
+    });
+
+    enableDragAndDrop(
+        "#company-thumb",
+        "{% url 'api-company-detail' company.id %}",
+        {
+            label: 'image',
+            method: 'PATCH',
+            success: function(data, status, xhr) {
+
+                if (data.image) {
+                    $('#company-image').attr('src', data.image);
+                } else {
+                    location.reload();
+                }
+            }
+        }
+    );
+
+    {% if company.image %}
+    $('#company-image').click(function() {
+        showModalImage('{{ company.image.url }}');
+    });
+    {% endif %}
+
+    $("#company-image-upload").click(function() {
+        launchModalForm(
+            "{% url 'company-image' company.id %}",
+            {
+                reload: true
+            }
+        );
+    });
+
+    {% settings_value "INVENTREE_DOWNLOAD_FROM_URL" as allow_download %}
+
+    {% if allow_download %}
+    $('#company-image-url').click(function() {
+        launchModalForm(
+            '{% url "company-image-download" company.id %}',
+            {
+                reload: true,
+            }
+        )
+    });
+    {% endif %}
+
+{% endblock %}

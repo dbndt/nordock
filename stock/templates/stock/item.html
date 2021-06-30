@@ -1,0 +1,63 @@
+{% extends "stock/item_base.html" %}
+
+{% load static %}
+{% load inventree_extras %}
+{% load i18n %}
+
+{% block menubar %}
+{% include "stock/navbar.html" with tab="tracking" %}
+{% endblock %}
+
+{% block heading %}
+{% trans "Stock Tracking Information" %}
+{% endblock %}
+
+{% block details %}
+
+{% setting_object 'STOCK_OWNERSHIP_CONTROL' as owner_control %}
+{% if owner_control.value == "True" %}
+    {% authorized_owners item.owner as owners %}
+{% endif %}
+
+<hr>
+
+<!-- Check permissions and owner -->
+{% if owner_control.value == "False" or owner_control.value == "True" and user in owners %}
+    {% if roles.stock.change and not item.is_building %}
+    <div id='table-toolbar'>  
+        <div class='btn-group'>
+            <button class='btn btn-success' type='button' title='New tracking entry' id='new-entry'>
+                <span class='fas fa-plus-circle'></span> {% trans "New Entry" %}
+            </button>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+<table class='table table-condensed table-striped' id='track-table' data-toolbar='#table-toolbar'>
+</table>
+
+{% endblock %}
+
+{% block js_ready %}
+{{ block.super }}
+
+    $("#new-entry").click(function() {
+        launchModalForm(
+            "{% url 'stock-tracking-create' item.id %}",
+            {
+                reload: true,
+            }
+        );
+    }); 
+
+
+    loadStockTrackingTable($("#track-table"), {
+        params: {
+            ordering: '-date',
+            item: {{ item.pk }},
+            user_detail: true,
+        },
+        url: "{% url 'api-stock-track' %}", 
+    });
+
+{% endblock %}

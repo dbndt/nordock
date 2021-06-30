@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load i18n %}
+{% load inventree_extras %}
+
+{% block page_title %}
+{% inventree_title %} | {% trans "Supplier List" %} 
+{% endblock %}
+
+{% block content %}
+
+<h3>{{ title }}</h3>
+<hr>
+
+{% if pagetype == 'manufacturers' and roles.purchase_order.add or pagetype == 'suppliers' and roles.purchase_order.add or pagetype == 'customers' and roles.sales_order.add %}
+<div id='button-toolbar'>
+    <div class='btn-group'>
+        <button type='button' class="btn btn-success" id='new-company'>
+            <span class='fas fa-plus-circle'></span> {{ button_text }}
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<table class='table table-striped table-condensed' id='company-table' data-toolbar='#button-toolbar'>
+</table>
+
+{% endblock %}
+{% block js_ready %}
+{{ block.super }}
+    $('#new-company').click(function () {
+        launchModalForm("{{ create_url }}", {
+            follow: true
+        });
+    });
+
+    loadCompanyTable("#company-table", "{% url 'api-company-list' %}",
+        {
+            pagetype: '{{ pagetype }}',
+            params: {
+                {% for key,value in filters.items %}{{ key }}: "{{ value }}",{% endfor %}
+            }
+        }
+    );
+
+{% endblock %}

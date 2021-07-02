@@ -28,7 +28,7 @@ ENV INVENTREE_SECRET_KEY_FILE="${INVENTREE_DATA_DIR}/secret_key.txt"
 # Default web server port is 8000
 ENV INVENTREE_WEB_PORT="8000"
 
-# Delete build dependencies
+RUN apk update
 RUN apk add --no-cache git make musl-dev bash \
     gcc libgcc g++ libstdc++ \
     libjpeg-turbo libjpeg-turbo-dev jpeg jpeg-dev \
@@ -44,43 +44,41 @@ RUN apk add --no-cache sqlite
 
 RUN apk add --no-cache mariadb-connector-c mariadb-dev mariadb-client
 
+RUN python3 -m venv ${INVENTREE_HOME}/env
+ENV PATH="${INVENTREE_HOME}/bin:$PATH"
 
-RUN pip install --upgrade pip setuptools wheel
+COPY requirements.txt ${INVENTREE_HOME}/requirements.txt
 
-RUN addgroup -S inventreegroup && adduser -S inventree -G inventreegroup
-RUN apk update
-
-
-RUN pip install --no-cache-dir invoke
-RUN pip install --no-cache-dir psycopg2 mysqlclient pgcli
-RUN pip install --no-cache-dir gunicorn
+RUN pip install --upgrade pip wheels setuptools wheels
+RUN pip install --user -r requirements.txt
+RUN pip install --no-cache-dir --user invoke
+RUN pip install --no-cache-dir --user psycopg2 mysqlclient pgcli
+RUN pip install --no-cache-dir --user gunicorn
 
 
 FROM base as production
 
-WORKDIR ${INVENTREE_HOME}
+#add group
+RUN addgroup -S inventreegroup && adduser -S inventree -G inventreegroup
+USER inventree
+WORKDIR $INVENTREE_HOME
 
+COPY --from=base --chown=inventree:inventreegroup ${INVENTREE_HOME}/env ${INVENTREE_HOME}/env
+ENV PATH="${INVENTREE_HOME}/bin:$PATH"
+# Ownership
+COPY --chown=inventree:inventreegroup . ${INVENTREE_HOME}
 
-COPY --chown=inventree:inventreegroup requirements.txt ${INVENTREE_HOME}/requirements.txt
-RUN pip install --user -r requirements.txt
+LABEL maintainer="DebianDocker dbndtdb@gmail.com" \
+      version="1.0.0"
 
-ENV PATH="/home/inventree/.local/bin:${PATH}"
+# COPY --chown=inventree:inventreegroup gunicorn.conf.py ${INVENTREE_HOME}/gunicorn.conf.py
 
-COPY --chown=inventree:inventreegroup . .
-
-COPY requirements.txt ${INVENTREE_HOME}/requirements.txt
-RUN pip install --no-cache-dir -U -r ${INVENTREE_HOME}/requirements.txt
-
-COPY --chown=inventree:inventreegroup gunicorn.conf.py ${INVENTREE_HOME}/gunicorn.conf.py
-
-
-COPY start_prod_server.sh ${INVENTREE_HOME}/start_prod_server.sh
-COPY start_prod_worker.sh ${INVENTREE_HOME}/start_prod_worker.sh
+# COPY start_prod_server.sh ${INVENTREE_HOME}/start_prod_server.sh
+# COPY start_prod_worker.sh ${INVENTREE_HOME}/start_prod_worker.sh
 
 RUN chmod 755 ${INVENTREE_HOME}/start_prod_server.sh
 RUN chmod 755 ${INVENTREE_HOME}/start_prod_worker.sh
 
-WORKDIR ${INVENTREE_HOME}
-USER inventree
 # Let us begin
+USER inventree
 CMD ["bash", "./start_prod_server.sh"]

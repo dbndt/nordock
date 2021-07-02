@@ -23,23 +23,25 @@ services:
         container_name: inventree-db
         image: postgres
         ports:
-            - 5432/tcp
+            - 5432:5434
+        env_file:
+            - ./.env.prod.db
         environment:
-            PGDATA: /var/lib/postgresql/data/pgdb
-            # The pguser and pgpassword values must be the same in the other containers
-            POSTGRES_USER: $INVENTREE_DB_USER
-            POSTGRES_PASSWORD: $INVENTREE_DB_PASSWORD
+            PGDATA: /var/lib/postgresql/12/main/
+            POSTGRES_USER: pguser
+            POSTGRES_PASSWORD: pgpassword
         volumes:
             # Map 'data' volume such that postgres database is stored externally
-            data:/var/lib/postgresql/data/
+            - data:/var/lib/postgresql/12/main
         restart: unless-stopped
+
 
     # InvenTree web server services
     # Uses gunicorn as the web server
     inventree-server:
         build:
             context: .
-            dockerfile: Dockerfile.prod
+            dockerfile: Dockerfile
         expose:
             - 8000
         depends_on:
@@ -47,25 +49,35 @@ services:
         volumes:
             # Data volume must map to /home/inventree/data
             - data:/home/inventree/data
+        environment:
+            # Default environment variables are configured to match the 'db' container
+            # Note: If you change the database image, these will need to be adjusted
+            # Note: INVENTREE_DB_HOST should match the container name of the database
+            - INVENTREE_DB_USER=pguser
+            - INVENTREE_DB_PASSWORD=pgpassword
+            - INVENTREE_DB_ENGINE=postgresql
+            - INVENTREE_DB_NAME=invtr
+            - INVENTREE_DB_HOST=inventree-db
+            - INVENTREE_DB_PORT=5432
         restart: unless-stopped
         env_file:
             - ./.env.prod.db
 
     # Background worker process handles long-running or periodic tasks
-    inventree-worker:
-        build:
-            context: .
-        container_name: inventree-worker
-        entrypoint: ./start_worker.sh
-        depends_on:
-            - inventree-db
-            - inventree-server
-        volumes:
-            # Data volume must map to /home/inventree/data
-            - data:/home/inventree/data
-        restart: unless-stopped
-        env_file:
-            - ./.env.prod.db
+    # inventree-worker:
+    #     build:
+    #         context: .
+    #     container_name: inventree-worker
+    #     entrypoint: ./start_worker.sh
+    #     depends_on:
+    #         - inventree-db
+    #         - inventree-server
+    #     volumes:
+    #         # Data volume must map to /home/inventree/data
+    #         - data:/home/inventree/data
+    #     restart: unless-stopped
+    #     env_file:
+    #         - ./.env.prod.db
 
     # nginx acts as a reverse proxy
     # static files are served directly by nginx
@@ -98,4 +110,4 @@ volumes:
             o: bind
             # This directory specified where InvenTree data are stored "outside" the docker containers
             # Change this path to a local system path where you want InvenTree data stored
-            device: /home/inventree/invdata
+            device: /home/inventree/data

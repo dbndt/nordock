@@ -49,7 +49,7 @@ ENV PATH="${INVENTREE_HOME}/bin:$PATH"
 
 COPY requirements.txt ${INVENTREE_HOME}/requirements.txt
 
-RUN pip install --upgrade pip wheels setuptools wheels
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install --user -r requirements.txt
 RUN pip install --no-cache-dir --user invoke
 RUN pip install --no-cache-dir --user psycopg2 mysqlclient pgcli

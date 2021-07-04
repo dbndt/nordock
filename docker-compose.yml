@@ -23,7 +23,7 @@ services:
         container_name: inventree-db
         image: postgres
         ports:
-            - 5432:5434
+            - 5432
         env_file:
             - ./.env.prod.db
         environment:
@@ -32,7 +32,9 @@ services:
             POSTGRES_PASSWORD: pgpassword
         volumes:
             # Map 'data' volume such that postgres database is stored externally
+            - ./postgres.conf:/etc/postgresql/12/main/postgresql.conf
             - data:/var/lib/postgresql/12/main
+            - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
         restart: unless-stopped
 
 

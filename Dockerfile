@@ -47,7 +47,8 @@ RUN apk add --no-cache mariadb-connector-c mariadb-dev mariadb-client
 RUN python3 -m venv ${INVENTREE_HOME}/env
 ENV PATH="${INVENTREE_HOME}/bin:$PATH"
 
-COPY requirements.txt ${INVENTREE_HOME}/requirements.txt
+COPY . .
+COPY ./requirements.txt ${INVENTREE_HOME}/requirements.txt
 
 RUN pip install --upgrade pip setuptools wheel
 RUN pip install --user -r requirements.txt

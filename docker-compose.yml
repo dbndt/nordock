@@ -25,7 +25,7 @@ services:
         ports:
             - 5432/tcp
         environment:
-            # - PGDATA=/var/lib/postgresql/data/pgdb
+            - PGDATA=/var/lib/postgresql/data/pgdb
             # The pguser and pgpassword values must be the same in the other containers
             - POSTGRES_USER=${INVENTREE_DB_USER:-inventree}
             - POSTGRES_PASSWORD=${INVENTREE_DB_PASSWORD:?database password not set}

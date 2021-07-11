@@ -36,7 +36,10 @@ LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.name="nordock" 
 
 # Create user account
-RUN addgroup -S inventreegroup && adduser -S inventree -G inventreegroup
+RUN addgroup --gid 1024 inventreegroup
+RUN adduser --disabled-password --gecos "" --force-badname --ingroup 1024 inventree
+USER inventree
+# RUN addgroup -S inventreegroup && adduser -S inventree -G inventreegroup
 
 WORKDIR ${INVENTREE_HOME}
 

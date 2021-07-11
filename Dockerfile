@@ -1,9 +1,5 @@
 FROM alpine:3.13 as base
 
-# # GitHub source
-# ARG repository="https://github.com/inventree/InvenTree.git"
-# ARG branch="master"
-
 ENV PYTHONUNBUFFERED 1
 
 # InvenTree key settings

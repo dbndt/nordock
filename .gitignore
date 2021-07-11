@@ -5,3 +5,4 @@ __pycache
 *.yaml
 *.txt
 *.yml
+*.code-workspace

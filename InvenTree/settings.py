@@ -512,7 +512,7 @@ LANGUAGES = [
 CURRENCIES = CONFIG.get(
     'currencies',
     [
-        'AUD', 'CAD', 'EUR', 'GBP', 'JPY', 'NZD', 'USD',
+        'AUD', 'CAD', 'EUR', 'GBP', 'JPY', 'NZD', 'INR', 'USD',
     ],
 )
 
@@ -524,7 +524,7 @@ for currency in CURRENCIES:
 
 BASE_CURRENCY = get_setting(
     'INVENTREE_BASE_CURRENCY',
-    CONFIG.get('base_currency', 'USD')
+    CONFIG.get('base_currency', 'INR')
 )
 
 # Custom currency exchange backend
@@ -586,7 +586,7 @@ LOCALE_PATHS = (
 
 TIME_ZONE = get_setting(
     'INVENTREE_TIMEZONE',
-    CONFIG.get('timezone', 'UTC')
+    CONFIG.get('timezone', 'Asia/Kolkata')
 )
 
 USE_I18N = True

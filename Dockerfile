@@ -10,7 +10,7 @@ ENV INVENTREE_HOME="/home/inventree"
 # GitHub settings
 # ENV INVENTREE_REPO="${repository}"
 # ENV INVENTREE_BRANCH="${branch}"
-
+ENV INVENTREE_TIMEZONE="Asia/Kolkata"
 ENV INVENTREE_LOG_LEVEL="INFO"
 ENV INVENTREE_DOCKER="true"
 

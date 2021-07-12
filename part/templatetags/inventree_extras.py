@@ -156,19 +156,19 @@ def inventree_commit_date(*args, **kwargs):
 @register.simple_tag()
 def inventree_github_url(*args, **kwargs):
     """ Return URL for InvenTree github site """
-    return "https://github.com/InvenTree/InvenTree/"
+    return "https://github.com/dbndt/nordock/tree/fin"
 
 
 @register.simple_tag()
 def inventree_docs_url(*args, **kwargs):
-    """ Return URL for InvenTree documenation site """
-    return "https://inventree.readthedocs.io/"
+    """ Return URL for Reference site """
+    return "https://www.nordusk.in/"
 
 
 @register.simple_tag()
 def inventree_credits_url(*args, **kwargs):
     """ Return URL for InvenTree credits site """
-    return "https://inventree.readthedocs.io/en/latest/credits/"
+    return "http://www.karunagroup.in/"
 
 
 @register.simple_tag()

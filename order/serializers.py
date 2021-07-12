@@ -111,7 +111,7 @@ class POLineItemSerializer(InvenTreeModelSerializer):
             self.fields.pop('part_detail')
             self.fields.pop('supplier_part_detail')
 
-    # TODO: Once https://github.com/inventree/InvenTree/issues/1687 is fixed, remove default values
+    # TODO: Once https://github.com/dbndt/nordock/tree/fin/issues/1687 is fixed, remove default values
     quantity = serializers.FloatField(default=1)
     received = serializers.FloatField(default=0)
 
@@ -316,7 +316,7 @@ class SOLineItemSerializer(InvenTreeModelSerializer):
     part_detail = PartBriefSerializer(source='part', many=False, read_only=True)
     allocations = SalesOrderAllocationSerializer(many=True, read_only=True)
 
-    # TODO: Once https://github.com/inventree/InvenTree/issues/1687 is fixed, remove default values
+    # TODO: Once https://github.com/dbndt/nordock/tree/fin/issues/1687 is fixed, remove default values
     quantity = serializers.FloatField(default=1)
 
     allocated = serializers.FloatField(source='allocated_quantity', read_only=True)
